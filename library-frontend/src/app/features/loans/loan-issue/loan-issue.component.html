@@ -1,0 +1,126 @@
+<section class="form-panel wide">
+  <div class="card">
+  <h2 class="title">📝 Видати книгу</h2>
+      <h2 class="title">Видати книгу</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="loan-form">
+        <div *ngIf="loadingRef" class="muted">Завантаження довідників...</div>
+
+        <!-- Pick in sequence: читач -> книга -->
+  <div class="pick-lists">
+          <div class="card list-card">
+            <div class="row between">
+              <strong>Читачі</strong>
+              <input class="input" type="text" placeholder="Пошук читачів..." (input)="setReadersSearch($any($event.target).value)" />
+            </div>
+            <div *ngIf="readersLoading" class="muted small mt-1">Завантаження...</div>
+            <div *ngIf="!readersLoading && !readers.length" class="muted small mt-1">Немає читачів</div>
+            <div class="table-scroll-x" *ngIf="readers.length">
+              <table class="lib-table no-margin">
+                <thead><tr><th>ID</th><th>Логін</th><th>Роль</th></tr></thead>
+                <tbody>
+      <tr *ngFor="let u of readers" class="row-click" (click)="pickReader(u)" [class.selected]="form.value.userId===u.id">
+                    <td><span class="mono" [title]="u.id">{{ u.id.slice(-6) }}</span></td>
+                    <td><a [routerLink]="['/users', u.id, 'profile']" class="user-link" (click)="$event.stopPropagation()">{{ u.username }}</a></td>
+                    <td>читач</td>
+                  </tr>
+                  <tr class="filler" *ngFor="let _ of fillRows(readers.length, readersLimit)"><td colspan="3">&nbsp;</td></tr>
+                </tbody>
+              </table>
+              <div class="pager">
+                <button class="btn outline" (click)="prevReaders()" [disabled]="readersPage<=1">Попередня</button>
+                <span>Стор. {{ readersPage }} / {{ readersPages }}</span>
+                <button class="btn outline" (click)="nextReaders()" [disabled]="readersPage>=readersPages">Наступна</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card list-card" *ngIf="form.value.userId as selReader">
+            <div class="row between">
+              <strong>Доступні книги</strong>
+              <input class="input" type="text" placeholder="Пошук книг..." (input)="setBooksSearch($any($event.target).value)" />
+            </div>
+            <div *ngIf="booksLoading" class="muted small mt-1">Завантаження...</div>
+            <div *ngIf="!booksLoading && !booksAvail.length" class="muted small mt-1">Немає книг</div>
+            <div class="table-scroll-x" *ngIf="booksAvail.length">
+              <table class="lib-table no-margin">
+                <thead><tr><th>Назва</th><th>Автор</th><th>Жанр</th><th>Ціна/день</th><th>Доступно</th></tr></thead>
+                <tbody>
+      <tr *ngFor="let b of booksAvail" class="row-click" (click)="pickBook(b)" [class.selected]="form.value.bookId===b.id">
+                    <td>{{ b.title }}</td>
+                    <td>{{ b.author }}</td>
+                    <td>{{ b.genre }}</td>
+                    <td>₴{{ b.rentPrice }}</td>
+                    <td>{{ b.availableCount ?? (b.available ? 1 : 0) }}</td>
+                  </tr>
+                  <tr class="filler" *ngFor="let _ of fillRows(booksAvail.length, booksLimit)"><td colspan="5">&nbsp;</td></tr>
+                </tbody>
+              </table>
+              <div class="pager">
+                <button class="btn outline" (click)="prevBooks()" [disabled]="booksPage<=1">Попередня</button>
+                <span>Стор. {{ booksPage }} / {{ booksPages }}</span>
+                <button class="btn outline" (click)="nextBooks()" [disabled]="booksPage>=booksPages">Наступна</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  <div class="form-field" *ngIf="form.value.userId && form.value.bookId">
+          <div class="row between">
+            <div class="mode-switch">
+              <button class="chip" type="button" [class.active]="issueMode==='date'" (click)="switchMode('date')">За датою</button>
+              <button class="chip" type="button" [class.active]="issueMode==='days'" (click)="switchMode('days')">За днями</button>
+            </div>
+            <small class="muted">Інтервал 1–60 днів</small>
+          </div>
+
+          <ng-container *ngIf="issueMode==='date'; else daysMode">
+            <label class="form-field" [class.invalid]="fieldError('dueDate')">
+              Дата повернення
+              <input type="date" formControlName="dueDate" [min]="minDueDate" [disabled]="issuing" />
+              <small class="err" *ngIf="fieldError('dueDate')">{{ fieldError('dueDate') }}</small>
+            </label>
+          </ng-container>
+          <ng-template #daysMode>
+            <div class="quick-days">
+              <div class="chips">
+                <button *ngFor="let d of quickDays" type="button" class="chip" [class.active]="selectedDays===d" (click)="setDays(d)">{{ d }} дн.</button>
+              </div>
+              <div class="days-input-row">
+                <label>Ввести дні:
+                  <input type="number" min="1" max="60" (input)="onDaysInput(($any($event.target)).value)" [value]="selectedDays || ''" />
+                </label>
+                <small class="err" *ngIf="daysInputError">{{ daysInputError }}</small>
+              </div>
+            </div>
+          </ng-template>
+  </div>
+
+  <div class="muted" *ngIf="!form.value.userId">Спочатку оберіть читача для видачі.</div>
+  <div class="muted" *ngIf="form.value.userId && !form.value.bookId">Тепер оберіть книгу зі списку.</div>
+
+  <div class="summary pretty" *ngIf="previewDays > 0">
+          <div class="pill"><span class="label">Днів</span><span class="val">{{ previewDays }}</span></div>
+          <div class="pill"><span class="label">Знижка</span><span class="val">{{ previewDiscount }}%</span></div>
+          <div class="pill"><span class="label">Оренда</span><span class="val">₴{{ previewTotalRent }}</span></div>
+          <div class="pill"><span class="label">Застава</span><span class="val">₴{{ previewDeposit }}</span></div>
+          <div class="total">До оплати: <strong>₴{{ previewPayableNow }}</strong></div>
+        </div>
+
+  <div class="card info" *ngIf="previewDays > 0">
+    <div *ngIf="previewDiscount > 0; else noDisc">
+      <div><strong>Базова оренда без знижки:</strong> ₴{{ baseRent }}</div>
+      <div><strong>Знижка:</strong> {{ previewDiscount }}% (економія ₴{{ baseRent - previewTotalRent }})</div>
+      <div><strong>Оренда зі знижкою:</strong> ₴{{ previewTotalRent }}</div>
+    </div>
+    <ng-template #noDisc>
+      <div><strong>Орендна вартість:</strong> ₴{{ previewTotalRent }}</div>
+    </ng-template>
+  </div>
+
+  <div class="actions">
+          <button class="btn" type="submit" [disabled]="issuing || form.invalid">{{ issuing ? '⌛' : '✅' }} {{ issuing ? 'Обробка...' : 'Видати' }}</button>
+          <button type="button" class="btn outline" (click)="goBack()">Скасувати</button>
+        </div>
+  </form>
+  </div>
+</section>

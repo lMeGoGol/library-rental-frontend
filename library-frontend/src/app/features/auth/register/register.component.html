@@ -1,0 +1,54 @@
+<section class="form-panel">
+  <div class="card">
+    <h2 style="margin-top:0;">Реєстрація</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" style="display:grid; gap:.9rem; grid-template-columns:1fr 1fr;" (keydown.enter)="$event.preventDefault()">
+      <label class="form-field required" style="grid-column: span 2" [class.invalid]="fieldError('username')">
+        <span>Логін</span>
+  <input id="username" type="text" formControlName="username" autocomplete="off" />
+        <small class="err" *ngIf="fieldError('username')">{{ fieldError('username') }}</small>
+      </label>
+      <label class="form-field required" style="grid-column: span 2" [class.invalid]="fieldError('password')">
+        <span>Пароль</span>
+
+  <input id="password" type="password" formControlName="password" autocomplete="new-password" />
+        <small class="err" *ngIf="fieldError('password')">{{ fieldError('password') }}</small>
+      </label>
+
+  <label class="form-field required" [class.invalid]="fieldError('lastName')">
+        <span>Прізвище</span>
+        <input id="lastName" type="text" formControlName="lastName" />
+        <small class="err" *ngIf="fieldError('lastName')">{{ fieldError('lastName') }}</small>
+      </label>
+
+  <label class="form-field required" [class.invalid]="fieldError('firstName')">
+        <span>Ім’я</span>
+        <input id="firstName" type="text" formControlName="firstName" />
+        <small class="err" *ngIf="fieldError('firstName')">{{ fieldError('firstName') }}</small>
+      </label>
+
+  <label class="form-field required" [class.invalid]="fieldError('middleName')">
+        <span>По-батькові</span>
+        <input id="middleName" type="text" formControlName="middleName" />
+        <small class="err" *ngIf="fieldError('middleName')">{{ fieldError('middleName') }}</small>
+      </label>
+
+  <label class="form-field required" style="grid-column: span 2" [class.invalid]="fieldError('address')">
+        <span>Адреса</span>
+        <input id="address" type="text" formControlName="address" />
+        <small class="err" *ngIf="fieldError('address')">{{ fieldError('address') }}</small>
+      </label>
+
+  <label class="form-field required" style="grid-column: span 2" [class.invalid]="fieldError('phone')">
+        <span>Телефон</span>
+        <input id="phone" type="tel" formControlName="phone" />
+        <small class="err" *ngIf="fieldError('phone')">{{ fieldError('phone') }}</small>
+      </label>
+
+      <div style="grid-column: span 2;" *ngIf="error" class="err">{{ error }}</div>
+      <div style="grid-column: span 2; display:flex; gap:.6rem;">
+  <button class="btn auth-primary" type="submit" [disabled]="loading">{{ loading ? '⌛' : '📝' }} {{ loading ? 'Завантаження...' : 'Зареєструватися' }}</button>
+        <a class="btn outline" routerLink="/login">Увійти</a>
+      </div>
+    </form>
+  </div>
+</section>

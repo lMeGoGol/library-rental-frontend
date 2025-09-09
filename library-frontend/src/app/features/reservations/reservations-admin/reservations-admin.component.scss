@@ -1,0 +1,6 @@
+.table-wrap { overflow-x:auto; }
+.user-link { color: var(--accent-color, #1976d2); text-decoration: none; }
+.user-link:hover { text-decoration: underline; }
+.modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal { background:#fff; padding:1rem 1.25rem; border-radius:6px; width: min(420px, 90%); box-shadow:0 4px 16px rgba(0,0,0,0.25); }
+textarea.input { resize: vertical; }

@@ -1,0 +1,65 @@
+<section class="card">
+  <h2 class="mt-0">🔔 Резерви</h2>
+  <div class="toolbar mb-10">
+    <label>Статус:
+      <select (change)="setStatus(($any($event.target)).value)" [value]="status">
+        <option value="pending">очікує</option>
+        <option value="fulfilled">виконано</option>
+        <option value="cancelled">скасовано</option>
+        <option value="">усі</option>
+      </select>
+    </label>
+  </div>
+  <div *ngIf="loading">Завантаження…</div>
+  <div *ngIf="!loading && !reservations.length" class="muted">Немає резервів</div>
+  <div *ngIf="!loading && reservations.length" class="table-wrap">
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Книга</th>
+          <th>Читач</th>
+          <th>Дні</th>
+          <th>Статус</th>
+          <th>Створено</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of reservations; trackBy: trackById">
+          <td class="mono" [title]="r.id">{{ r.id.slice(-6) }}</td>
+          <td>{{ bookTitle(r) }}</td>
+          <td>
+            <a [routerLink]="['/users', (typeof r.reader==='string'? r.reader : r.reader.id), 'profile']" class="user-link">
+              {{ userName(r) }}
+            </a>
+          </td>
+          <td>{{ r.desiredDays }}</td>
+          <td><span class="badge" [class.warn]="r.status==='pending'" [class.success]="r.status==='fulfilled'" [class.danger]="r.status==='cancelled'">{{ r.status==='pending' ? 'очікує' : (r.status==='fulfilled' ? 'виконано' : 'скасовано') }}</span></td>
+          <td>{{ r.createdAt | date:'short' }}</td>
+          <td class="row-actions">
+            <button class="btn compact" (click)="issue(r)" [disabled]="r.status!=='pending'">Видати</button>
+            <button class="btn outline compact" (click)="openCancel(r)" [disabled]="r.status!=='pending'">Скасувати</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pager mt-05">
+      <button class="btn outline" (click)="prev()" [disabled]="page<=1">◀</button>
+      <span>Стор. {{page}} / {{pages}}</span>
+      <button class="btn outline" (click)="next()" [disabled]="page>=pages">▶</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showCancel">
+    <div class="modal">
+      <h3 class="mt-0">Скасування резерву</h3>
+      <p class="small muted">Опціонально вкажіть причину:</p>
+      <textarea class="input" rows="3" [(ngModel)]="cancelReason" placeholder="Причина (необовʼязково)"></textarea>
+      <div class="row mt-10">
+        <button class="btn" (click)="confirmCancel()">Підтвердити</button>
+        <button class="btn outline" (click)="closeCancel()">Відмінити</button>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,73 @@
+<section class="form-panel wide">
+  <div class="card">
+    <h2 class="title">↩️ Повернути книгу</h2>
+
+    <form [formGroup]="returnForm" class="loan-form mb-1">
+      <label class="form-field">
+        ID позики
+        <input class="input" formControlName="loanId" placeholder="введіть ID позики" />
+      </label>
+    </form>
+
+    <div class="card-table mb-2">
+      <div class="table-scroll-x" *ngIf="activeLoans?.length; else noActive">
+        <table class="lib-table no-margin">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Книга</th>
+              <th>Користувач</th>
+              <th>Видано</th>
+              <th>Очікується</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of activeLoans" (click)="pickLoan(l)" class="row-click" [class.selected]="selectedLoan?.id===l.id">
+              <td class="id-col"><span class="mono" [title]="l.id">{{ formatId(l.id) }}</span></td>
+              <td>{{ getBookTitle(l.book) }}</td>
+              <td>
+                <a *ngIf="l.reader && typeof l.reader!=='string'" [routerLink]="['/users', l.reader.id, 'profile']" class="user-link" (click)="$event.stopPropagation()">{{ getUserName(l.reader) }}</a>
+                <span *ngIf="!l.reader || typeof l.reader==='string'">{{ getUserName(l.reader) }}</span>
+              </td>
+              <td>{{ l.issueDate | date:'shortDate' }}</td>
+              <td>
+                <span class="due-chip" [ngClass]="dueClass(l.expectedReturnDate)">{{ l.expectedReturnDate | date:'shortDate' }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <button class="btn outline" (click)="prevActive()" [disabled]="activePage<=1">Попередня</button>
+          <span>Стор. {{ activePage }} / {{ activePages }}</span>
+          <button class="btn outline" (click)="nextActive()" [disabled]="activePage>=activePages">Наступна</button>
+        </div>
+      </div>
+      <ng-template #noActive>
+        <div class="muted">Немає активних позик</div>
+      </ng-template>
+    </div>
+
+    <form [formGroup]="returnForm" class="loan-form mt-2">
+      <div class="selected-return" *ngIf="selectedLoan as s">
+        <div>
+          <strong>Обрана позика:</strong> <span class="mono">{{ formatId(s.id) }}</span>
+        </div>
+        <div class="muted small">{{ getBookTitle(s.book) }} — <a *ngIf="s.reader && typeof s.reader!=='string'" [routerLink]="['/users', s.reader.id, 'profile']" class="user-link" (click)="$event.stopPropagation()">{{ getUserName(s.reader) }}</a><span *ngIf="!s.reader || typeof s.reader==='string'">{{ getUserName(s.reader) }}</span></div>
+        <button type="button" class="btn tiny outline" (click)="clearSelected()">Змінити</button>
+      </div>
+      <label class="form-field">
+        Рівень пошкодження
+        <div class="damage-levels">
+          <button *ngFor="let d of damageLevels" type="button" class="chip" [class.active]="returnForm.value.damageLevel===d.value" (click)="returnForm.patchValue({ damageLevel: d.value })">{{ d.label }} (₴{{ d.fee }})</button>
+        </div>
+      </label>
+      <div class="calc-inline">
+        <div class="sum"><span class="label">Без прострочки:</span> <strong>₴{{ baseWithoutOverdue }}</strong></div>
+        <button type="button" class="btn outline" (click)="previewReturn()">Розрахунок</button>
+        <div class="sum" *ngIf="showReturnTotal"><span class="label">Всього до сплати:</span> <strong>₴{{ totalToPay }}</strong></div>
+        <span class="badge warn" *ngIf="previewPenaltyNow>0">+₴{{ previewPenaltyNow }} пеня</span>
+        <button type="button" class="btn" (click)="doReturn()">↩️ Повернути</button>
+      </div>
+    </form>
+  </div>
+</section>

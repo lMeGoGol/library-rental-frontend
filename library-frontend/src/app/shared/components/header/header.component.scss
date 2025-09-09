@@ -1,0 +1,50 @@
+.header {
+  background: #1976d2;
+  color: white;
+  padding: 1rem;
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 14px;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+.theme-toggle-wrapper { margin-left:auto; display:inline-flex; align-items:center; gap:.45rem; }
+.theme-switch {
+  position: relative;
+  width: 48px; height: 26px; /* outer capsule */
+  background: rgba(255 255 255 / .2);
+  border: 1px solid rgba(255 255 255 / .6);
+  cursor: pointer; display: inline-flex; align-items: center;
+  overflow: hidden; /* keep knob perfectly inside */
+}
+.theme-switch .knob {
+  position: absolute; left: 1px;
+  width: 22px; height: 22px; border-radius: 50%; /* matches inner height */
+  background: #fff; color:#000; display: grid; place-items: center;
+  transition: transform .2s ease;
+}
+.theme-switch .knob.dark { transform: translateX(22px); } /* 44 - 22 */
+.theme-label { opacity:.85; font-size:.9rem; }
+.switch-icon { opacity:.6; font-size: 16px; line-height: 1; }
+.switch-icon.active { opacity: 1; }

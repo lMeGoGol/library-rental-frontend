@@ -1,0 +1,85 @@
+<section class="users-page">
+  <div>
+  <div class="section-title">👥 Користувачі</div>
+  <div class="card">
+    <div class="toolbar">
+      <input #search class="input" type="text" placeholder="Пошук..." (input)="onSearch(search.value)" />
+      <select #roleSel class="input" (change)="onRoleFilterChange(roleSel.value)" *ngIf="viewerRole==='admin'">
+        <option value="">Всі ролі</option>
+        <option value="admin">адміністратор</option>
+        <option value="librarian">бібліотекар</option>
+        <option value="reader">читач</option>
+      </select>
+    </div>
+  
+  <div *ngIf="loading" class="loading">Завантаження...</div>
+  <div *ngIf="!loading && error" class="empty error-text">{{ error }}</div>
+  <table *ngIf="!loading && users.length" class="lib-table">
+      <thead>
+        <tr>
+  <th class="id-col">ID</th>
+      <th>Логін</th>
+      <th>Роль</th>
+      <th>Знижка</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr class="row-click" *ngFor="let u of users; trackBy: trackById" (click)="select(u)">
+      <td class="id-col">
+        <div class="id-cell">
+          <span class="mono short-id" [title]="u.id">…{{ u.id.slice(-5) }}</span>
+          <button class="btn compact" title="Копіювати ID" (click)="$event.stopPropagation(); copyId(u.id)">📋</button>
+        </div>
+      </td>
+  <td><a [routerLink]="['/users', u.id, 'profile']" class="user-link" (click)="$event.stopPropagation()">{{ u.username }}</a></td>
+      <td>{{ u.role === 'admin' ? 'адміністратор' : (u.role === 'librarian' ? 'бібліотекар' : 'читач') }}</td>
+      <td>{{ u.discountCategory === 'student' ? 'студент' : (u.discountCategory === 'loyal' ? 'лояльний' : (u.discountCategory === 'pensioner' ? 'пенсіонер' : (u.discountCategory === 'vip' ? 'VIP' : 'без знижки'))) }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && !users.length" class="empty">Немає користувачів</div>
+    <div class="pager">
+      <button class="btn outline" (click)="prev()" [disabled]="page<=1">Попередня</button>
+      <span>Сторінка {{page}} / {{pages}}</span>
+      <button class="btn outline" (click)="next()" [disabled]="page>=pages">Наступна</button>
+    </div>
+  </div>
+  </div>
+
+  <div class="card editor-card">
+    <ng-container *ngIf="selected; else noSelection">
+  <h3>Дані користувача</h3>
+      <div class="editor-grid">
+  <label>Імʼя<input class="input" [(ngModel)]="firstNameDraft" placeholder="Імʼя" /></label>
+  <label>Прізвище<input class="input" [(ngModel)]="lastNameDraft" placeholder="Прізвище" /></label>
+        <label>По-батькові<input class="input" [(ngModel)]="middleNameDraft" placeholder="По-батькові" /></label>
+        <label>Телефон<input class="input" [(ngModel)]="phoneDraft" placeholder="+380..." /></label>
+  <label class="full">Адреса<input class="input" [(ngModel)]="addressDraft" placeholder="Адреса" /></label>
+      </div>
+      <div class="mt-sm row-inline" *ngIf="viewerRole==='admin' && selected"><strong>Роль:</strong>
+        <span>{{ selected.role === 'admin' ? 'адміністратор' : (selected.role === 'librarian' ? 'бібліотекар' : 'читач') }}</span>
+      </div>
+      <div class="mt-sm row-inline" *ngIf="roleDraft==='reader'"><strong>Категорія знижки:</strong>
+        <select class="input compact" [(ngModel)]="discountDraft">
+          <option value="none">без знижки</option>
+          <option value="student">студент</option>
+          <option value="loyal">лояльний</option>
+          <option value="pensioner">пенсіонер</option>
+          <option value="vip">VIP</option>
+        </select>
+        <button class="btn primary" (click)="saveDiscount()">Зберегти</button>
+        <span class="saved" *ngIf="savedDiscount">Збережено ✓</span>
+      </div>
+      <div class="mt-sm row-tools">
+        <button class="btn primary" (click)="saveProfile()">Зберегти профіль</button>
+        <span class="saved" *ngIf="savedProfile">Збережено ✓</span>
+  <button class="btn outline" type="button" (click)="closeEditor()">Скасувати</button>
+        <a *ngIf="selected" class="btn outline ml-auto" [routerLink]="['/users', selected.id, 'profile']">Історія звернень</a>
+      </div>
+      
+    </ng-container>
+    <ng-template #noSelection>
+      <div class="empty">Оберіть користувача ліворуч для редагування</div>
+    </ng-template>
+  </div>
+</section>

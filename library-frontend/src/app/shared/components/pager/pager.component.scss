@@ -1,0 +1,12 @@
+.pager {
+  padding: .5rem .75rem;
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+  align-items: center;
+  border-top: 1px solid #eee;
+}
+
+.pager__info {
+  font-size: .9rem;
+}

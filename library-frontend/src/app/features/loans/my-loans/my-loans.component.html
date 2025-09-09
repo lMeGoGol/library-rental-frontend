@@ -1,0 +1,40 @@
+<section>
+  <div class="section-title">📖 Мої позики</div>
+  <div *ngIf="loading" class="card loading">Завантаження...</div>
+  <div *ngIf="!loading && loans.length" class="card card-table">
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>ID книги</th>
+          <th>Книга</th>
+          <th>Видано</th>
+          <th>Повернуто</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of loans; trackBy: trackById">
+          <td class="id-col">
+            <div class="id-cell">
+              <span class="mono" [title]="l.id">{{ formatId(l.id) }}</span>
+              <button class="btn tiny outline" title="Копіювати ID" (click)="copyId($event, l.id)">📋</button>
+            </div>
+          </td>
+          <td class="id-col">
+            <div class="id-cell">
+              <span class="mono" [title]="getBookId(l.book)">{{ formatId(getBookId(l.book)) }}</span>
+              <button class="btn tiny outline" title="Копіювати ID книги" (click)="copyId($event, getBookId(l.book))">📋</button>
+            </div>
+          </td>
+          <td>{{ displayBook(l.book) }}</td>
+          <td>{{ l.issueDate | date:'shortDate' }}</td>
+          <td>{{ l.actualReturnDate ? (l.actualReturnDate | date:'shortDate') : '—' }}</td>
+          <td><span class="badge" [class.success]="l.status==='returned'" [class.warn]="l.status==='issued'">{{ l.status === 'issued' ? 'видано' : (l.status === 'returned' ? 'повернено' : l.status) }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div *ngIf="!loading && !loans.length" class="card empty">Немає позик</div>
+
+</section>

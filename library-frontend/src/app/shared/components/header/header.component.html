@@ -1,0 +1,31 @@
+<header class="header">
+  <nav>
+    <a routerLink="/books" *ngIf="user$ | async">📚 Книги</a>
+    <a routerLink="/loans/mine" *appHasRole="'reader'">📖 Мої позики</a>
+  <a routerLink="/reservations/mine" *appHasRole="'reader'">🔔 Мої броні</a>
+    <a routerLink="/loans" *appHasRole="['admin','librarian']">📂 Усі позики</a>
+  <a routerLink="/loans/issue" *appHasRole="['admin','librarian']">📝 Видати</a>
+  <a routerLink="/loans/return" *appHasRole="['admin','librarian']">↩️ Повернути</a>
+  <a routerLink="/reservations/admin" *appHasRole="['admin','librarian']">🔔 Резерви</a>
+    <a routerLink="/users" *appHasRole="['admin','librarian']">👥 Користувачі</a>
+    <a routerLink="/books/new" *appHasRole="['admin','librarian']">➕ Додати книгу</a>
+
+    <ng-container *ngIf="user$ | async as user; else guest">
+  <a routerLink="/profile">👤 {{ displayName(user) }}</a>
+      <button (click)="logout()">Вийти</button>
+    </ng-container>
+
+    <ng-template #guest>
+      <a routerLink="/login">Увійти</a>
+      <a routerLink="/register">Реєстрація</a>
+    </ng-template>
+    <span class="theme-toggle-wrapper">
+      <span class="theme-label" aria-hidden="true">{{ theme.theme === 'light' ? 'Світла' : 'Темна' }}</span>
+      <span class="switch-icon" [class.active]="theme.theme==='light'">☀️</span>
+  <button class="theme-switch" (click)="toggleTheme()" [attr.aria-pressed]="theme.theme==='dark'" aria-label="Перемкнути тему">
+        <span class="knob" [class.dark]="theme.theme==='dark'"></span>
+      </button>
+      <span class="switch-icon" [class.active]="theme.theme==='dark'">🌙</span>
+    </span>
+  </nav>
+</header>

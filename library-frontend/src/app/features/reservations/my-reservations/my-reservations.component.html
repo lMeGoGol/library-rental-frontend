@@ -1,0 +1,36 @@
+<section>
+  <div class="section-title">🔔 Мої броні</div>
+  <div *ngIf="loading" class="card loading">Завантаження...</div>
+  <div *ngIf="!loading && reservations.length" class="card card-table">
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th>ID броні</th>
+          <th>ID книги</th>
+          <th>Книга</th>
+          <th>Днів</th>
+          <th>Статус</th>
+          <th>Залишилось</th>
+          <th *ngIf="showCancelCol">Причина</th>
+          <th style="width:120px;">Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of reservations; trackBy: trackById">
+          <td class="mono" title="{{ r.id }}">…{{ r.id.slice(-6) }}</td>
+          <td class="mono" title="{{ getBookId(r) }}">…{{ getBookId(r).slice(-6) }}</td>
+          <td>{{ r.book | bookTitle }}</td>
+          <td>{{ r.desiredDays }}</td>
+          <td><span class="badge" [class.success]="r.status==='fulfilled'" [class.warn]="r.status==='pending'" [class.danger]="r.status==='cancelled'">{{ r.status==='pending' ? 'очікує' : (r.status==='fulfilled' ? 'виконано' : 'скасовано') }}</span></td>
+          <td>{{ getRemaining(r) }}</td>
+          <td *ngIf="showCancelCol">{{ r.cancelReason || (r.status==='cancelled' ? '—' : '') }}</td>
+          <td>
+            <button class="btn danger" *ngIf="r.status==='pending'" (click)="cancel(r)">Скасувати</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  <app-pager [page]="page" [limit]="limit" [length]="reservations.length" [total]="total" (prev)="prevPage()" (next)="nextPage()" />
+  </div>
+  <div *ngIf="!loading && !reservations.length" class="card" style="font-size:.85rem;">Немає броні</div>
+</section>

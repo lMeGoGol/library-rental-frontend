@@ -1,0 +1,180 @@
+<section class="card" *ngIf="user">
+  <h2 class="mt-0">Профіль</h2>
+  <form *ngIf="form" [formGroup]="form" class="form-grid" (ngSubmit)="save()">
+    <div class="two-col">
+      <div class="col-left">
+        <label>
+          <span>Прізвище</span>
+          <input formControlName="lastName" type="text" />
+        </label>
+        <label>
+          <span>Імʼя</span>
+          <input formControlName="firstName" type="text" />
+        </label>
+        <label>
+          <span>По-батькові</span>
+          <input formControlName="middleName" type="text" />
+        </label>
+        <label>
+          <span>Адреса</span>
+          <input formControlName="address" type="text" />
+        </label>
+        <label>
+          <span>Телефон</span>
+          <input formControlName="phone" type="text" />
+        </label>
+        <div class="full"><h3 class="section-title">Зміна паролю</h3></div>
+        <div class="full full-reset" *ngIf="isSelf">
+          <label>
+            <span>Поточний пароль</span>
+            <input [(ngModel)]="currentPwd" [ngModelOptions]="{standalone:true}" type="password" />
+          </label>
+        </div>
+        <div class="full full-reset">
+          <label>
+            <span>Новий пароль</span>
+            <input [(ngModel)]="newPwd" [ngModelOptions]="{standalone:true}" type="password" />
+          </label>
+        </div>
+        <div class="full">
+          <div class="row">
+            <button class="btn btn-save-discount" type="button" (click)="changePassword()" [disabled]="changingPwd">Змінити пароль</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-right">
+        <div class="info-row key"><strong>ID:</strong> <span class="mono" [title]="user.id">{{ user.id }}</span></div>
+        <div class="info-row key"><strong>Логін:</strong> {{ user.username }}</div>
+        <div class="info-row key role-row">
+          <strong>Роль:</strong>
+          <ng-container *ngIf="isStaff && !isSelf && user?.role!=='reader'; else roleView">
+            <select class="input" [(ngModel)]="roleDraft" [ngModelOptions]="{standalone:true}">
+              <option value="reader">читач</option>
+              <option value="librarian">бібліотекар</option>
+              <option value="admin">адміністратор</option>
+            </select>
+            <div class="role-actions">
+              <button class="btn compact" type="button" (click)="saveRole()" [disabled]="savingRole">Зберегти роль</button>
+              <span class="saved" *ngIf="savedRole">Збережено ✓</span>
+            </div>
+          </ng-container>
+          <ng-template #roleView>{{ user.role === 'admin' ? 'адміністратор' : (user.role === 'librarian' ? 'бібліотекар' : 'читач') }}</ng-template>
+        </div>
+
+        <ng-container *ngIf="user.discountCategory && user.discountCategory !== 'none'">
+          <div class="profile-box mt-05">
+            <h3 class="box-title">Поточна знижка</h3>
+            <div class="discount-tag">
+              {{ user.discountCategory === 'student' ? 'студент' : (user.discountCategory === 'loyal' ? 'лояльний' : (user.discountCategory === 'pensioner' ? 'пенсіонер' : (user.discountCategory === 'vip' ? 'VIP' : ''))) }}
+            </div>
+            <div class="muted">Знижка на оренду: {{ user.discountCategory === 'student' ? '20%' : (user.discountCategory === 'loyal' ? '15%' : (user.discountCategory === 'pensioner' ? '50%' : (user.discountCategory === 'vip' ? '30%' : '0%'))) }}.</div>
+          </div>
+        </ng-container>
+
+        <div *ngIf="canEditDiscount" class="profile-box mt-05">
+          <h3 class="box-title">Змінити знижку</h3>
+          <label class="mb-sm"><span>Категорія</span>
+            <select class="input" [(ngModel)]="discountDraft" [ngModelOptions]="{standalone: true}" name="discountForUser">
+              <option value="none">без знижки</option>
+              <option value="student">студент</option>
+              <option value="loyal">лояльний</option>
+              <option value="pensioner">пенсіонер</option>
+              <option value="vip">VIP</option>
+            </select>
+          </label>
+          <div class="muted small">Підказка: студент — 20%, лояльний — 15%, пенсіонер — 50%, VIP — 30%.</div>
+          <div class="row mt-05">
+            <button class="btn btn-save-discount" type="button" (click)="saveDiscount()" [disabled]="savingDiscount">Зберегти знижку</button>
+            <span *ngIf="savedDiscount" class="saved">Збережено ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="form-actions">
+      <button class="btn btn-save-discount" type="submit" [disabled]="saving">💾 {{ saving ? 'Збереження...' : 'Зберегти' }}</button>
+      <button class="btn outline" type="button" (click)="goBack()">Скасувати</button>
+  <!-- Removed duplicate 'Мої позики' button (available in main menu) -->
+      <span *ngIf="saved" class="saved">Збережено ✓</span>
+    </div>
+  </form>
+</section>
+<div *ngIf="loading">Завантаження...</div>
+
+<section *ngIf="showHistory && user?.role==='reader'" class="card mt-section">
+  <h3 class="mt-0">Історія позик</h3>
+  <div *ngIf="!history?.length" class="muted">Немає записів</div>
+  <div *ngIf="history?.length" class="card-table">
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Книга</th>
+          <th>Видано</th>
+          <th>Повернуто</th>
+          <th>Статус</th>
+          <th *ngIf="user?.role!=='reader'">Деталі</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of history">
+          <td class="id-col"><span class="mono" [title]="h.id">{{ formatId(h.id) }}</span></td>
+          <td>{{ displayBook(h.book) }}</td>
+          <td>{{ h.issueDate | date:'shortDate' }}</td>
+          <td>{{ h.actualReturnDate ? (h.actualReturnDate | date:'shortDate') : '—' }}</td>
+          <td><span class="badge" [class.success]="h.status==='returned'" [class.warn]="h.status==='issued'">{{ h.status === 'issued' ? 'видано' : (h.status === 'returned' ? 'повернено' : h.status) }}</span></td>
+          <td *ngIf="user?.role!=='reader'">
+            <div class="muted small">
+              ₴/день: {{ h.rentPerDay }}; днів: {{ h.days }}; сума: ₴{{ h.totalRent }}; застава: ₴{{ h.deposit }}
+              <span *ngIf="h.penalty && h.penalty>0">; штраф: ₴{{ h.penalty }}</span>
+              <span *ngIf="h.damageFee && h.damageFee>0">; пошкодження: ₴{{ h.damageFee }}</span>
+              <span *ngIf="h.discountCategory && h.discountCategory!=='none'">; знижка: {{ h.discountCategory }} ({{ h.discountPercent || 0 }}%)</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section *ngIf="showReservations && isStaff && user?.role==='reader'" class="card mt-section">
+  <h3 class="mt-0">Бронювання користувача</h3>
+  <div class="toolbar mb-05">
+    <label>Статус:
+      <select (change)="setReservationsStatus(($any($event.target)).value || '')">
+        <option value="pending" [selected]="reservationsStatus==='pending'">Очікує</option>
+        <option value="fulfilled" [selected]="reservationsStatus==='fulfilled'">Виконано</option>
+        <option value="cancelled" [selected]="reservationsStatus==='cancelled'">Скасовано</option>
+        <option value="" [selected]="reservationsStatus===''">Усі</option>
+      </select>
+    </label>
+  </div>
+  <div *ngIf="reservationsLoading">Завантаження…</div>
+  <div *ngIf="!reservationsLoading && !reservations.length" class="muted">Немає бронювань</div>
+  <div *ngIf="!reservationsLoading && reservations.length" class="card-table">
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Книга</th>
+          <th>Дні</th>
+          <th>Статус</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of reservations">
+          <td class="mono" [title]="r.id">{{ formatId(r.id) }}</td>
+          <td>{{ (typeof r.book==='string' ? r.book : r.book.title) || '-' }}</td>
+          <td>{{ r.desiredDays }}</td>
+          <td><span class="badge" [class.warn]="r.status==='pending'" [class.success]="r.status==='fulfilled'" [class.danger]="r.status==='cancelled'">{{ r.status==='pending' ? 'очікує' : (r.status==='fulfilled' ? 'виконано' : 'скасовано') }}</span></td>
+          <td class="row-actions">
+            <button class="btn compact" (click)="issueReservation(r)" [disabled]="r.status!=='pending'">Видати</button>
+            <button class="btn outline compact" (click)="cancelReservation(r)" [disabled]="r.status!=='pending'">Скасувати</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

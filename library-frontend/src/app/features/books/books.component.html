@@ -1,0 +1,83 @@
+<section class="books">
+  <div class="section-title">📚 Список книг</div>
+  <div class="search-bar">
+    <input type="text" placeholder="Пошук за назвою / автором / жанром..." (input)="onSearch($event.target.value)" />
+    <a routerLink="/books/new" class="btn outline" *appHasRole="['admin','librarian']">➕ Додати</a>
+  </div>
+  <div class="card filters-bar">
+    <label>Сортування:</label>
+    <select [value]="sortBy" (change)="setSort(($any($event.target)).value)">
+      <option value="title">Назва</option>
+      <option value="author">Автор</option>
+      <option value="rentPrice">Оренда/день</option>
+      <option value="createdAt">Додано</option>
+    </select>
+    <button class="btn outline" (click)="toggleDir()">Напрямок: {{ sortDir==='asc' ? '⬆' : '⬇' }}</button>
+  </div>
+
+  <div *ngIf="loading" class="card loading">Завантаження...</div>
+  <div *ngIf="!loading && error" class="card error-text">{{ error }}</div>
+  <div *ngIf="!loading && books.length === 0" class="card empty">Немає книг</div>
+
+  <div *ngIf="!loading && books.length > 0" class="card card-table">
+    <div class="table-scroll-x">
+    <table class="lib-table no-margin">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Обкладинка</th>
+          <th>Назва</th>
+          <th>Автор</th>
+          <th>Жанр</th>
+          <th>Оренда/день</th>
+          <th>Застава</th>
+          <th>Наявність</th>
+          <th *ngIf="isEditor">Статус</th>
+          <th class="col-actions">Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr *ngFor="let book of books; trackBy: trackById" (click)="onRowClick(book, $event)" [class.row-click]="isEditor" [class.unavailable]="book.availableCount === 0">
+          <td class="col-id">
+            <span class="mono" [title]="book.id">{{ formatId(book.id) }}</span>
+            <button class="btn compact outline" title="Скопіювати ID" (click)="copyId($event, book.id)">📋</button>
+          </td>
+          <td>
+            <img *ngIf="book.thumbnailUrl" [src]="book.thumbnailUrl" alt="cover" class="thumb" />
+          </td>
+          <td>
+            <strong>{{ book.title }}</strong>
+            <div class="small muted" *ngIf="book.isReserved && book.reservedUntil as ru">До звільнення: {{ getReserveRemaining(ru) }}</div>
+          </td>
+          <td>{{ book.author }}</td>
+          <td><span class="badge primary">{{ book.genre }}</span></td>
+          <td>₴{{ book.rentPrice }}</td>
+          <td>₴{{ book.deposit }}</td>
+          <td>
+            <ng-container *ngIf="book.quantity != null && book.availableCount != null; else unknown">
+              <ng-container *ngIf="book.isReserved && book.quantity === 1; else normalCount">0 / 1</ng-container>
+              <ng-template #normalCount>{{ book.availableCount }} / {{ book.quantity }}</ng-template>
+            </ng-container>
+            <ng-template #unknown>—</ng-template>
+          </td>
+          <td *ngIf="isEditor">
+            <span class="badge" [class.danger]="!book.available && !book.isReserved" [class.warn]="book.isReserved" [class.success]="book.available && !book.isReserved">
+              {{ book.isReserved ? 'заброньована' : (book.available ? 'доступна' : 'недоступна') }}
+            </span>
+          </td>
+          <td class="col-actions">
+            <div class="row-actions">
+              <button class="btn danger" *appHasRole="['admin','librarian']" (click)="delete(book); $event.stopPropagation()">✖ Видалити</button>
+              <button class="btn" *appHasRole="'reader'" (click)="reserve(book); $event.stopPropagation()" [disabled]="book.isReserved || book.availableCount === 0" [class.disabled-btn]="book.isReserved || book.availableCount === 0">🔔 Резерв</button>
+              <ng-container *ngIf="book.isReserved">
+                <button class="btn outline" *appHasRole="['admin','librarian']" (click)="release(book); $event.stopPropagation()">🔓 Зняти бронь</button>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+  </table>
+  </div>
+  <app-pager [page]="page" [limit]="pageSize" [total]="total" [pages]="totalPages" (prev)="prevPage()" (next)="nextPage()" />
+  </div>
+</section>

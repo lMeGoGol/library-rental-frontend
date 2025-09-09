@@ -1,0 +1,104 @@
+<section>
+  <div class="section-title">📂 Позики</div>
+  <div class="card filters-bar">
+    <div class="filters-title">Фільтри</div>
+    <div class="filters-grid">
+      <div class="fg">
+        <label>Статус</label>
+        <select class="input small" (change)="setStatus(($any($event.target)).value)" [value]="status">
+          <option value="all">всі</option>
+          <option value="issued">видано</option>
+          <option value="returned">повернено</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Сортування</label>
+        <div class="inline">
+          <select class="input small" [value]="sortBy" (change)="setSort(($any($event.target)).value)">
+            <option value="issueDate">Видано</option>
+            <option value="expectedReturnDate">Очікується</option>
+            <option value="status">Статус</option>
+          </select>
+          <button class="btn icon outline" (click)="toggleDir()" title="Змінити напрямок">{{ sortDir==='asc' ? '⬆' : '⬇' }}</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Прострочені</label>
+        <label class="inline">
+          <input type="checkbox" [checked]="overdueMode" (change)="toggleOverdue()" />
+          <span>лише прострочені</span>
+        </label>
+      </div>
+
+      <div class="fg">
+        <label>Reader ID</label>
+        <input class="input small" type="text" placeholder="readerId" [(ngModel)]="filterReaderId" />
+      </div>
+      <div class="fg">
+        <label>Book ID</label>
+        <input class="input small" type="text" placeholder="bookId" [(ngModel)]="filterBookId" />
+      </div>
+      <div class="fg actions-right">
+        <label>&nbsp;</label>
+        <div class="inline">
+          <button class="btn search" (click)="applyFilters()">🔎 Пошук</button>
+          <button class="btn outline" (click)="clearFilters()" [disabled]="!filterReaderId && !filterBookId">Очистити</button>
+          <!-- Резерви кнопка видалена (окреме меню) -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="loading" class="card loading">Завантаження...</div>
+  <div *ngIf="!loading && loans.length" class="card card-table">
+    <div class="table-scroll-x">
+    <table class="lib-table no-margin">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>ID книги</th>
+          <th>Книга</th>
+          <th>Користувач</th>
+          <th>Видано</th>
+          <th>Повернуто</th>
+          <th>Статус</th>
+          <th class="actions-col">Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of loans">
+          <td class="id-col">
+            <div class="id-cell">
+              <span class="mono" [title]="l.id">{{ formatId(l.id) }}</span>
+              <button class="btn tiny outline" title="Копіювати ID" (click)="copyId($event, l.id)">📋</button>
+            </div>
+          </td>
+          <td class="id-col">
+            <div class="id-cell">
+              <span class="mono" [title]="getBookId(l.book)">{{ formatId(getBookId(l.book)) }}</span>
+              <button class="btn tiny outline" title="Копіювати ID книги" (click)="copyId($event, getBookId(l.book))">📋</button>
+            </div>
+          </td>
+          <td>{{ l.book | bookTitle }}</td>
+          <td>
+            <a *ngIf="l.reader && typeof l.reader!=='string'" [routerLink]="['/users', l.reader.id, 'profile']" class="user-link">{{ l.reader.username }}</a>
+            <span *ngIf="!l.reader || typeof l.reader==='string'">{{ l.reader | userName }}</span>
+          </td>
+          <td>{{ l.issueDate | date:'shortDate' }}</td>
+          <td>{{ l.actualReturnDate ? (l.actualReturnDate | date:'shortDate') : '—' }}</td>
+          <td>
+            <span class="badge" [class.success]="l.status==='returned'" [class.warn]="l.status==='issued'">
+              {{ l.status === 'issued' ? 'видано' : (l.status === 'returned' ? 'повернено' : l.status) }}
+            </span>
+          </td>
+          <td class="actions">
+      <button class="btn action-return" *ngIf="l.status === 'issued'" (click)="returnLoan(l)">↩️ Повернути</button>
+      <button class="btn action-renew" *ngIf="l.status === 'issued'" (click)="renew(l)">⏩ Продовжити</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  <app-pager [page]="page" [limit]="limit" [length]="loans.length" (prev)="prevPage()" (next)="nextPage()" />
+  </div>
+  <div *ngIf="!loading && !loans.length" class="card empty">Немає позик</div>
+</section>

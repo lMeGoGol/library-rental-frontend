@@ -1,0 +1,59 @@
+<section class="form-panel">
+  <div class="card">
+    <h2>{{ editing ? 'Редагувати книгу' : 'Нова книга' }}</h2>
+    <ng-container *ngIf="!loading; else loadingTpl">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-fields">
+        <label class="form-field" [class.invalid]="fieldError('title')">Назва
+          <input formControlName="title" /> 
+          <small class="err" *ngIf="fieldError('title')">{{ fieldError('title') }}</small>
+        </label>
+        <label class="form-field" [class.invalid]="fieldError('author')">Автор
+          <input formControlName="author" /> 
+          <small class="err" *ngIf="fieldError('author')">{{ fieldError('author') }}</small>
+        </label>
+        <label class="form-field" [class.invalid]="fieldError('genre')">Жанр
+          <select formControlName="genre" class="input">
+            <option value="" disabled>— оберіть жанр —</option>
+            <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+          </select>
+          <small class="err" *ngIf="fieldError('genre')">{{ fieldError('genre') }}</small>
+        </label>
+        <div class="row">
+          <label class="form-field flex-1" [class.invalid]="fieldError('rentPrice')">Оренда/день
+            <input type="number" formControlName="rentPrice" min="0" placeholder="вкажіть суму за 1 день (₴)" /> 
+            <small class="muted" *ngIf="!fieldError('rentPrice')">Ціна за 1 день оренди (₴)</small>
+            <small class="err" *ngIf="fieldError('rentPrice')">{{ fieldError('rentPrice') }}</small>
+          </label>
+          <label class="form-field flex-1" [class.invalid]="fieldError('deposit')">Застава
+            <input type="number" formControlName="deposit" min="0" placeholder="сума застави (₴)" /> 
+            <small class="muted" *ngIf="!fieldError('deposit')">Сума застави у гривнях</small>
+            <small class="err" *ngIf="fieldError('deposit')">{{ fieldError('deposit') }}</small>
+          </label>
+        </div>
+        <div class="form-field">
+          <label>Мініатюра (обкладинка)
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+          </label>
+          <div *ngIf="previewUrl" class="preview">
+            <img [src]="previewUrl" alt="preview" class="preview-img" (error)="previewUrl=null" />
+            <small class="muted" *ngIf="form.value.thumbnailUrl">URL: {{ form.value.thumbnailUrl }}</small>
+            <span class="badge" *ngIf="!form.value.thumbnailUrl">локальний попередній перегляд</span>
+          </div>
+        </div>
+        <label class="switch-field">
+          <span class="switch-label">Доступна</span>
+          <input class="switch-input" type="checkbox" formControlName="available" />
+          <span class="switch-ui" aria-hidden="true"></span>
+        </label>
+        <div class="actions">
+          <button class="btn btn-save-accent" type="submit" [disabled]="form.invalid">💾 Зберегти</button>
+          <button type="button" class="btn outline" (click)="goBack()">Скасувати</button>
+          <button *ngIf="editing" type="button" class="btn danger ml-auto" (click)="confirmDelete()">🗑️ Видалити</button>
+        </div>
+      </form>
+    </ng-container>
+    <ng-template #loadingTpl>
+      <div class="muted">Завантаження...</div>
+    </ng-template>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+<section class="form-panel">
+    <div class="card">
+        <h2 style="margin-top:0;">Увійти</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" (keydown.enter)="$event.preventDefault()" style="display:flex; flex-direction:column; gap:.9rem;">
+            <label class="form-field required" [class.invalid]="fieldError('username')">
+                <span>Логін</span>
+                <input id="username" type="text" formControlName="username" autocomplete="off" />
+                <small class="err" *ngIf="fieldError('username')">{{ fieldError('username') }}</small>
+            </label>
+            <label class="form-field required" [class.invalid]="fieldError('password')">
+                <span>Пароль</span>
+                <input id="password" type="password" formControlName="password" autocomplete="current-password" />
+                <small class="err" *ngIf="fieldError('password')">{{ fieldError('password') }}</small>
+            </label>
+            <div *ngIf="error" class="err" style="margin-top:-4px;">{{ error }}</div>
+                        <div style="display:flex; gap:.6rem; align-items:center;">
+                            <button class="btn auth-primary" type="submit" [disabled]="loading">{{ loading ? '⌛' : '➡️' }} {{ loading ? 'Завантаження...' : 'Увійти' }}</button>
+                            <a class="btn outline" routerLink="/register">Реєстрація</a>
+                        </div>
+        </form>
+    </div>
+</section>

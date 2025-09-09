@@ -1,0 +1,22 @@
+<section class="card user-edit-card">
+  <h2 class="mt-0">Редагування користувача</h2>
+  <div *ngIf="!targetUserId" class="muted">Немає ID користувача</div>
+
+  <div *ngIf="targetUserId" class="form-vertical">
+    <div class="info-row key"><strong>ID:</strong> <span class="mono">{{ targetUserId }}</span></div>
+
+    <label class="field-row">
+      <span>Роль:</span>
+      <select #r class="input">
+        <option value="reader">читач</option>
+        <option value="librarian">бібліотекар</option>
+        <option value="admin">адміністратор</option>
+      </select>
+    </label>
+
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="changeRole(r.value)">Зберегти</button>
+      <button class="btn outline" type="button" (click)="goBack()">Скасувати</button>
+    </div>
+  </div>
+</section>

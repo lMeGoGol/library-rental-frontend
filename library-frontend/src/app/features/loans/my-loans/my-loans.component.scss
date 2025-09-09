@@ -1,0 +1,34 @@
+.id-col { width: 120px; }
+.id-cell { display: flex; align-items: center; gap: .35rem; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .85rem; }
+.btn.tiny { padding: .15rem .35rem; font-size: .8rem; line-height: 1; }
+.btn.cancel { background: transparent; color: var(--lib-danger); border: 1px solid var(--lib-danger); }
+.btn.cancel:hover { background: rgba(198 40 40 / .1); }
+.loading {
+    font-size: .85rem;
+    opacity: .75;
+}
+
+.card-table {
+    padding: 0;
+}
+
+.empty {
+    font-size: .85rem;
+}
+
+.table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.table th, .table td { 
+    padding: 4px 8px; 
+    border-bottom: 1px solid #ccc; 
+    font-size: 13px; 
+}
+
+.table th { 
+    background: rgba(0,0,0,0.05); 
+    text-align: left; 
+}
