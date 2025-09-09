@@ -32,6 +32,7 @@ export interface IssueLoanDto {
 export interface ReturnLoanDto {
   damaged?: boolean;
   damageFee?: number;
+  damageLevel?: 'minor'|'moderate'|'severe';
 }
 
 export function mapLoan(raw: any): Loan {

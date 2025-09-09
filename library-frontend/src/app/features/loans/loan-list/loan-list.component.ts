@@ -40,6 +40,11 @@ export class LoanListComponent implements OnInit {
 
   private load() {
     this.loading = true;
+  const valid24 = /^[a-fA-F0-9]{24}$/;
+  const readerId = (this.filterReaderId || '').trim();
+  const bookId = (this.filterBookId || '').trim();
+  const safeReader = readerId && valid24.test(readerId) ? readerId : '';
+  const safeBook = bookId && valid24.test(bookId) ? bookId : '';
     if (this.overdueMode) {
       this.loanService
         .listOverdue({ page: this.page, limit: this.limit })
@@ -56,8 +61,8 @@ export class LoanListComponent implements OnInit {
     }
     const params: any = {};
     if (this.status !== 'all') params.status = this.status;
-    if (this.filterReaderId?.trim()) params.reader = this.filterReaderId.trim();
-    if (this.filterBookId?.trim()) params.book = this.filterBookId.trim();
+  if (safeReader) params.reader = safeReader;
+  if (safeBook) params.book = safeBook;
     this.loanService
       .page({ ...params, page: this.page, limit: this.limit, sortBy: this.sortBy, order: this.sortDir })
       .pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); }))
@@ -134,6 +139,7 @@ export class LoanListComponent implements OnInit {
 
   applyFilters() { this.page = 1; this.load(); }
   clearFilters() { this.filterReaderId = ''; this.filterBookId = ''; this.page = 1; this.load(); }
+  isValidObjectId(v: string) { return /^[a-fA-F0-9]{24}$/.test(v); }
 
   trackById(_: number, l: Loan) { return l.id; }
 

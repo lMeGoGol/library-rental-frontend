@@ -33,9 +33,9 @@ export class LoanService {
         return this.http.get<any>(`${this.base}/preview-return/${id}`);
     }
 
-    getDamageLevels(): Observable<Array<{ value: 'none'|'minor'|'moderate'|'severe'; label: string; fee: number }>> {
+    getDamageLevels(): Observable<Array<{ value: 'minor'|'moderate'|'severe'; label: string; fee: number }>> {
         return this.http.get<Array<{ value: any; label: string; fee: number }>>(`${this.base}/damage-levels`).pipe(
-            map(levels => levels.map(l => ({ value: l.value as any, label: l.label, fee: l.fee })))
+            map(levels => levels.map(l => ({ value: l.value as 'minor'|'moderate'|'severe', label: l.label, fee: l.fee })))
         );
     }
 

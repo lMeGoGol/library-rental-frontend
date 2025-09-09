@@ -59,7 +59,9 @@
         Рівень пошкодження
         <div class="damage-levels">
           <button *ngFor="let d of damageLevels" type="button" class="chip" [class.active]="returnForm.value.damageLevel===d.value" (click)="returnForm.patchValue({ damageLevel: d.value })">{{ d.label }} (₴{{ d.fee }})</button>
+          <button type="button" class="chip outline" [class.active]="!returnForm.value.damageLevel" (click)="returnForm.patchValue({ damageLevel: '' })">Без пошкоджень</button>
         </div>
+  <div class="muted small" *ngIf="!returnForm.value.damageLevel">(Обрано: без пошкоджень)</div>
       </label>
       <div class="calc-inline">
         <div class="sum"><span class="label">Без прострочки:</span> <strong>₴{{ baseWithoutOverdue }}</strong></div>

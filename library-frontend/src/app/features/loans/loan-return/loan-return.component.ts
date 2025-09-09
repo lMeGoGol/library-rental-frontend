@@ -27,20 +27,18 @@ export class LoanReturnComponent implements OnInit {
 
   previewPenaltyNow = 0;
   showReturnTotal = false;
-  damageLevels: Array<{ value: 'none'|'minor'|'moderate'|'severe'; label: string; fee: number }> = [
-    { value: 'none', label: 'Немає', fee: 0 },
-  ];
+  damageLevels: Array<{ value: 'minor'|'moderate'|'severe'; label: string; fee: number }> = [];
 
   constructor(private fb: FormBuilder, private loanService: LoanService, private notify: NotificationService) {}
 
   ngOnInit(): void {
     this.returnForm = this.fb.group({
       loanId: ['', Validators.required],
-      damageLevel: ['none', Validators.required],
+      damageLevel: [''],
     });
 
     this.loanService.getDamageLevels().subscribe(levels => {
-      if (levels?.length) this.damageLevels = levels as any;
+      this.damageLevels = levels || [];
     });
     this.loadActiveLoans();
   }
@@ -69,8 +67,9 @@ export class LoanReturnComponent implements OnInit {
   getUserName(user: User | string) { return typeof user === 'string' ? user : `${user.username}`; }
 
   private currentDamageFee(): number {
-    const level = (this.returnForm.value.damageLevel as 'none'|'minor'|'moderate'|'severe') || 'none';
-    return this.damageLevels.find(d => d.value === level)?.fee ?? 0;
+  const level = (this.returnForm.value.damageLevel as 'minor'|'moderate'|'severe'|'' ) || '';
+  if (!level) return 0;
+  return this.damageLevels.find(d => d.value === level)?.fee ?? 0;
   }
   get baseWithoutOverdue(): number {
     const fee = this.currentDamageFee();
@@ -116,16 +115,17 @@ export class LoanReturnComponent implements OnInit {
   doReturn() {
     const id = (this.selectedLoan?.id || this.returnForm.value.loanId)?.trim();
     if (!id) return;
-    const level = (this.returnForm.value.damageLevel as 'none'|'minor'|'moderate'|'severe') || 'none';
-    const fee = this.damageLevels.find(d => d.value === level)?.fee ?? 0;
-    const damaged = level !== 'none';
-    const damageFee = fee;
-    this.loanService.returnLoan(id, { damaged, damageFee, damageLevel: level } as any).subscribe({
+  const level = (this.returnForm.value.damageLevel as 'minor'|'moderate'|'severe'|'' ) || '';
+  const fee = level ? (this.damageLevels.find(d => d.value === level)?.fee ?? 0) : 0;
+  const damaged = !!level;
+  const damageFee = fee;
+  const payload: any = damaged ? { damaged, damageFee, damageLevel: level } : { damaged: false };
+  this.loanService.returnLoan(id, payload).subscribe({
       next: res => {
         const s = res.settlement;
         const msg = `Повернено. Пеня: ₴${s.penalty || 0}. Шкода: ₴${s.damageFee || 0}. До повернення депозиту: ₴${s.depositReturned || 0}. Досплата: ₴${s.extraToPay || 0}.`;
         this.notify.success(msg);
-        this.returnForm.reset({ loanId: '', damageLevel: 'none' });
+    this.returnForm.reset({ loanId: '', damageLevel: '' });
         this.selectedLoan = null;
         this.previewPenaltyNow = 0;
         this.showReturnTotal = false;
