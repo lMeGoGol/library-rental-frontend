@@ -12,7 +12,6 @@ import { Router, RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule, PagerComponent],
   templateUrl: './reservations-list.component.html',
-  styleUrls: ['./reservations-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReservationsListComponent implements OnInit {

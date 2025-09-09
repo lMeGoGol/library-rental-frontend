@@ -13,7 +13,6 @@ import { PagerComponent } from '../../../shared/components/pager/pager.component
   standalone: true,
   imports: [CommonModule, RouterModule, BookTitlePipe, PagerComponent],
   templateUrl: './my-reservations.component.html',
-  styleUrls: ['./my-reservations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MyReservationsComponent implements OnInit {

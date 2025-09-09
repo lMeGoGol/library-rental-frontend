@@ -16,7 +16,6 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule, HasRoleDirective, PagerComponent],
   templateUrl: './books.component.html',
-  styleUrls: ['./books.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 

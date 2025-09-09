@@ -16,7 +16,6 @@ import { finalize } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, BookTitlePipe, UserNamePipe, PagerComponent],
   templateUrl: './loan-list.component.html',
-  styleUrls: ['./loan-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
